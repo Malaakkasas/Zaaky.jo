@@ -1,0 +1,60 @@
+.header {
+  width: 100%;
+  height: 34vw;
+  margin: 30px auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Floating content with soft styling */
+.header-contents {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+  max-width: 400px;
+  z-index: 1;
+}
+
+.header-contents h2 {
+  font-size: max(2.8vw, 20px);
+  font-weight: 600;
+  color: #7a0000;
+  text-shadow: 1px 1px 4px rgba(255, 239, 230, 0.6);
+  font-family: "Segoe UI", "Cairo", sans-serif;
+  margin: 0;
+}
+
+.header-contents p {
+  font-size: max(1vw, 13px);
+  line-height: 1.5;
+  color: #5f5f5f;
+  text-shadow: 1px 1px 3px rgba(255, 239, 230, 0.4);
+  font-family: "Segoe UI", "Cairo", sans-serif;
+  margin: 0;
+}
+
+.header-contents button {
+  background-color: #fff4f2;
+  color: #7a0000;
+  padding: 6px 18px;
+  border: 2px solid #7a0000;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: "Segoe UI", "Cairo", sans-serif;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.header-contents button:hover {
+  background-color: #fdf9f6;
+  transform: scale(1.05);
+}

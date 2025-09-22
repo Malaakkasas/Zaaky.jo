@@ -1,0 +1,62 @@
+.app-download {
+  background-color: #fdf9f6;
+  color: #7a0000;
+  text-align: center;
+  padding: 80px 20px;
+  font-family: "Segoe UI", "Cairo", sans-serif;
+}
+
+.app-download h2 {
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 1.4;
+  margin-bottom: 30px;
+}
+
+.app-download h2 br {
+  display: none;
+}
+
+.app-download h2 span {
+  display: block;
+  font-size: 24px;
+  font-weight: normal;
+  margin-top: 8px;
+  color: #a33;
+}
+
+.app-download-platforms {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.app-download-platforms img {
+  width: 180px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(122, 0, 0, 0.1);
+}
+
+.app-download-platforms img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(122, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+  .app-download h2 {
+    font-size: 24px;
+  }
+
+  .app-download h2 span {
+    font-size: 18px;
+  }
+
+  .app-download-platforms img {
+    width: 140px;
+  }
+}

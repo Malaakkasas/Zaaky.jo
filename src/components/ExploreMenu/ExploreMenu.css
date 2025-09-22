@@ -1,0 +1,100 @@
+.explore-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background-color: #fdf9f6;
+  font-family: "Segoe UI", "Cairo", sans-serif;
+}
+
+.explore-menu h1 {
+  color: #7a0000;
+  font-weight: 600;
+  font-size: 2rem;
+  text-align: center;
+  margin: 0;
+}
+
+.explore-menu-text {
+  color: #5f5f5f;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: center;
+  padding: 0 16px;
+}
+
+/* ✅ Clean horizontal scroll */
+.explore-menu-list {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 16px 0;
+  background-image: url("/patterns/shemagh-light.png");
+  background-repeat: repeat;
+  background-size: 100px;
+  border-radius: 8px;
+}
+
+.explore-menu-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* ✅ Simple item layout */
+.explore-menu-list-item {
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.explore-menu-list-item img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.explore-menu-list-item:hover img,
+.explore-menu-list-item.active img {
+  border-color: #7a0000;
+}
+
+.explore-menu-list-item p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #747474;
+  margin: 0;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.explore-menu-list-item:hover p,
+.explore-menu-list-item.active p {
+  color: #7a0000;
+}
+
+@media (max-width: 600px) {
+  .explore-menu-list {
+    gap: 20px;
+    padding: 16px;
+    background-size: 80px;
+  }
+
+  .explore-menu-list-item {
+    min-width: 100px;
+    padding: 10px;
+  }
+
+  .explore-menu-list-item img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .explore-menu-list-item p {
+    font-size: 1rem;
+  }
+}

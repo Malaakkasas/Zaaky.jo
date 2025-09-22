@@ -1,0 +1,144 @@
+.food-item {
+  width: 320px;
+  margin: 24px auto;
+  border-radius: 20px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  background-color: #fff;
+  transition: transform 0.3s ease;
+  animation: fadeIn 1s ease-in;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.food-item:hover {
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
+.food-item-img-container {
+  position: relative;
+}
+
+.food-item-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 20px 20px 0 0;
+}
+
+/* Quantity selector floats over the image */
+.food-item-quantity {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background-color: #fff;
+  padding: 8px 16px;
+  border-radius: 25px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.food-item-quantity button {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.food-item-quantity button:first-child {
+  background-color: #ffe5e5;
+  color: #d00000;
+}
+
+.food-item-quantity button:last-child {
+  background-color: #e5ffe5;
+  color: #009900;
+}
+
+.food-item-quantity button:hover {
+  background-color: #f0f0f0;
+}
+
+.food-item-quantity span {
+  font-size: 17px;
+  font-weight: 500;
+  color: #333;
+}
+
+.food-item-info {
+  padding: 18px;
+}
+
+.food-item-name-rating {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.food-item-name-rating p {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #2c2c2c;
+}
+
+.food-item-rating {
+  color: #f4c150;
+  font-size: 18px;
+}
+
+.food-item-desc {
+  font-size: 14px;
+  color: #777;
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+.food-item-price {
+  font-size: 22px;
+  color: #e74c3c;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Star Rating */
+.food-item-stars {
+  display: flex;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.star {
+  font-size: 18px;
+  color: #ccc;
+  transition: color 0.2s ease;
+}
+
+.star.filled {
+  color: #d00000;
+}

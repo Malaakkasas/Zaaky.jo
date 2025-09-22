@@ -1,0 +1,89 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  background-color: #fff;
+  height: 84px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: "Segoe UI", "Cairo", sans-serif;
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.logo-img {
+  height: 76px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 24px;
+}
+
+.navbar-menu a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.navbar-menu .active {
+  color: #7a0000;
+  font-weight: bold;
+  border-bottom: 2px solid #7a0000;
+}
+
+.navbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.navbar-basket {
+  position: relative;
+}
+
+.dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  background-color: #7a0000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.sign-in-btn {
+  padding: 8px 16px;
+  background-color: #7a0000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sign-in-btn:hover {
+  background-color: #a00000;
+}
