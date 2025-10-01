@@ -1,0 +1,698 @@
+//Number.prototype._called = {};
+import React, { useState, useEffect } from 'react';
+import { useHistory, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import {
+  Button,
+  CustomInput,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  FormFeedback
+} from 'reactstrap';
+import 'uicons/uicons.min.css';
+import LaddaButton, { EXPAND_RIGHT } from 'react-ladda';
+import DatePicker from 'react-datepicker';
+import { Menu, Typeahead } from 'react-bootstrap-typeahead';
+import { customerLoginAction } from '../../Redux/Reducers/User/user.actions';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { UserService } from '../../Services/UserServices/UserService';
+import { DashboardService } from '../../Services/Dashboard/DashBoardService';
+import { toastService } from '../../Utility/ToastService';
+import ReservationDateComponent from 'pages/ReserveAppointment/ReservationDateComponent';
+import Upload from 'components/Upload/Upload';
+
+const businessType = [
+  { name: ' Men Salon' },
+  { name: 'Woman Salon' },
+  { name: 'Spa' }
+];
+
+const Country = [
+  { name: 'Algeria' },
+  { name: 'United Arab Emirates' },
+  { name: 'Germany' },
+  { name: 'Syria' }
+];
+const City = [
+  {
+    name: 'Alabama',
+    population: 4780127,
+    capital: 'Montgomery',
+    region: 'South'
+  },
+  { name: 'Alaska', population: 710249, capital: 'Juneau', region: 'West' },
+  { name: 'Arizona', population: 6392307, capital: 'Phoenix', region: 'West' },
+  { name: 'Colorado', population: 5029324, capital: 'Denver', region: 'West' },
+  {
+    name: 'Washington',
+    population: 6724543,
+    capital: 'Olympia',
+    region: 'West'
+  },
+  {
+    name: 'West Virginia',
+    population: 1853011,
+    capital: 'Charleston',
+    region: 'South'
+  },
+  {
+    name: 'Wisconsin',
+    population: 5687289,
+    capital: 'Madison',
+    region: 'West'
+  },
+  { name: 'Wyoming', population: 563767, capital: 'Cheyenne', region: 'West' }
+];
+
+function CustomerCreateAccount({ loginActivity }) {
+  const { t, i18n } = useTranslation(['translation', 'auth']);
+
+  const [startDate, setStartDate] = useState(new Date());
+  const [expRight, setExpRight] = useState(false);
+  const toggleLoader = (showLoader) => setExpRight(showLoader);
+  const [countryList, setCountryList] = React.useState([]);
+
+  const [firstNameValid, setFirstNameValid] = React.useState(false);
+  const [lastNameValid, setLastNameValid] = React.useState(false);
+  const [validEmail, setValidEmail] = React.useState(false);
+
+  const [validPassword, setValidPassword] = React.useState(false);
+  const [validConfirmPassword, setValidConfirmPassword] = React.useState(false);
+  
+// Added these new state variables for password visibility
+  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = React.useState(false);
+  const [passwordVisibilityText, setPasswordVisibilityText] = React.useState(t('all:auth.show'));
+  const [confirmPasswordVisibilityText, setConfirmPasswordVisibilityText] = React.useState(t('all:auth.show'));
+
+  const [gender, setGender] = React.useState('1');
+  const [isAgreed, setIsAgreed] = React.useState(false);
+  const [selectedCountry, setSelectedCountry] = React.useState('jo');
+  const [phone, setPhone] = React.useState('');
+  const [rawPhone, setRawPhone] = React.useState(''); // Store only digits
+  const [phoneError, setPhoneError] = React.useState('');
+
+  const [validPhone, setValidPhone] = React.useState(false);
+  const [validCountry, setValidCountry] = React.useState(false);
+  const [
+    passwordValidationMessage,
+    setPasswordValidationMessage
+  ] = React.useState('');
+
+  const history = useHistory();
+
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    genderValue: '1',
+    nationalityId: '',
+    dateOfBirth: '',
+    password: '',
+    confirmPassword: '',
+    userPhoto: ''
+  });
+
+  useEffect(() => {
+    getCountries();
+    user.dateOfBirth = startDate;
+    // Initialize phone max and min length for default country (Jordan)
+    // Phone validation is now handled by the new system
+    // console.log(startDate);
+    // console.log('USSSSSSSSSSSSEEEE EFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
+  }, []);
+
+  const emailChk = (value) =>
+    value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)
+      ? 'Invalid email'
+      : undefined;
+
+  // ✅ Country configs with emojis, codes, min/max, formatting + placeholder
+  const countryConfigs = {
+    jo: { 
+      name: 'Jordan', flag: '🇯🇴', code: '+962', 
+      min: 9, max: 9, 
+      pattern: /(\d{3})(\d{3})(\d{3})/, 
+      placeholder: "XXX XXX XXX" 
+    },
+    ae: { 
+      name: 'UAE', flag: '🇦🇪', code: '+971', 
+      min: 9, max: 9, 
+      pattern: /(\d{2})(\d{3})(\d{4})/, 
+      placeholder: "XX XXX XXXX" 
+    },
+    sa: { 
+      name: 'Saudi Arabia', flag: '🇸🇦', code: '+966', 
+      min: 9, max: 9, 
+      pattern: /(\d{3})(\d{3})(\d{3})/, 
+      placeholder: "XXX XXX XXX" 
+    },
+    eg: { 
+      name: 'Egypt', flag: '🇪🇬', code: '+20', 
+      min: 10, max: 10, 
+      pattern: /(\d{3})(\d{3})(\d{4})/, 
+      placeholder: "XXX XXX XXXX" 
+    },
+    gb: { 
+      name: 'UK', flag: '🇬🇧', code: '+44', 
+      min: 9, max: 10, 
+      pattern: /(\d{5})(\d{3})(\d{2})/, 
+      placeholder: "XXXXX XXX XX" 
+    },
+    us: { 
+      name: 'USA', flag: '🇺🇸', code: '+1', 
+      min: 10, max: 10, 
+      pattern: /(\d{3})(\d{3})(\d{4})/, 
+      placeholder: "XXX XXX XXXX" 
+    },
+  };
+
+  // ✅ Format phone with spacing
+  const formatPhone = (digits, country) => {
+    const { pattern } = countryConfigs[country];
+    if (!pattern) return digits;
+    return digits.replace(pattern, (_, ...groups) => groups.filter(Boolean).join(" "));
+  };
+
+  // ✅ Validate phone length
+  const validatePhone = (digits, country) => {
+    const { min, max } = countryConfigs[country];
+    if (digits.length > max) {
+      setPhoneError(`Phone number cannot exceed ${max} digits.`);
+    } else {
+      setPhoneError('');
+    }
+  };
+
+  // ✅ Handle typing
+  const handlePhoneChange = (e) => {
+    const { max } = countryConfigs[selectedCountry];
+    let digits = e.target.value.replace(/\D/g, ''); // only numbers
+
+    // Prevent typing more than max
+    if (digits.length > max) {
+      digits = digits.slice(0, max);
+    }
+
+    setRawPhone(digits);
+    setPhone(formatPhone(digits, selectedCountry));
+    validatePhone(digits, selectedCountry);
+  };
+
+  // ✅ Handle country change
+  const handleCountryChange = (e) => {
+    const country = e.target.value;
+    setSelectedCountry(country);
+    setPhone('');
+    setRawPhone('');
+    setPhoneError('');
+  };
+
+
+  const isPasswordValidate = (text) => {
+    let reg = /(?=.*\d)(?=.*[!@#$%^&*]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
+    return reg.test(text);
+  };
+
+  const imageUpload = (uploadedFile = [], uploadType = 0) => {
+    setUser({...user, userPhoto: uploadedFile[0].fileContent})
+  }
+
+  const isFormvalid = () => {
+    setFirstNameValid(user.firstName === '');
+    setLastNameValid(user.lastName === '');
+    setValidEmail(
+      user.email === '' || emailChk(user.email) === 'Invalid email'
+    );
+    setValidPassword(user.password === '');
+    setValidConfirmPassword(user.confirmPassword === '');
+    setValidCountry(user.nationalityId === '');
+    
+    // Enhanced phone validation with country-specific max length check
+    const isPhoneValid = phoneError;
+    setValidPhone(isPhoneValid);
+
+    return !(
+      firstNameValid ||
+      lastNameValid ||
+      validEmail ||
+      validPassword ||
+      validConfirmPassword ||
+      validCountry ||
+      validPhone
+    );
+  };
+
+  const registerIndividualUser = () => {
+    if (isFormvalid()) {
+      if (!isAgreed) {
+        alert('Please agreed the terms and condition');
+        toggleLoader(false);
+        return false;
+      }
+
+      user.dateOfBirth =
+        user.dateOfBirth &&
+        user.dateOfBirth != '' &&
+        user.dateOfBirth.length > 24
+          ? user.dateOfBirth.toJSON()
+          : user.dateOfBirth;
+
+      UserService.registerUser(user)
+        .then((response) => {
+          if (
+            response &&
+            response.response &&
+            response.response.data &&
+            response.response.data.customErrorsList &&
+            response.response.data.customErrorsList.length > 0
+          ) {
+            toastService.successToast(
+              response.response.data.customErrorsList[0]
+            );
+          } else {
+            history.push('loginPage');
+            loginActivity({ snAct: 4, selectedTab: 1 });
+          }
+        })
+        .catch((response) => {
+          if (
+            response &&
+            response.response &&
+            response.response.data &&
+            response.response.data.customErrorsList &&
+            response.response.data.customErrorsList.length > 0
+          ) {
+            toastService.errorToast(response.response.data.customErrorsList[0]);
+          } else {
+            toastService.errorToast(
+              'Unable to process the request at this time'
+            );
+          }
+        });
+    }
+    toggleLoader(false);
+  };
+
+  const getCountries = () => {
+    DashboardService.getCounrtiesLookup()
+      .then((res) => {
+        if (res.itemsList && res.itemsList.length > 0) {
+          let countries = res.itemsList.map(function (item, i) {
+            return {
+              id: item.id,
+              encryptId: item.encryptId,
+              arabicName: item.arabicName,
+              englishName: item.englishName,
+              name: item.englishName
+            };
+          });
+          setCountryList(countries);
+        }
+      })
+      .catch((error) => {});
+  };
+
+  return (
+    <>
+      <div className="create-customer">
+        <h5 className="text-center font-weight-bold mb-3 mt-4 mt-xl-5">
+          {t('translation:Createaccount')}
+        </h5>
+        {/* <div className="d-flex flex-wrap align-items-center justify-content-center  pb-2 border-radius-primary">
+          <button className="btn-pill btn btn-sm mt-2 btn-google  btn-rounded d-flex align-items-center justify-content-center mr-2">
+            <span className="btn-wrapper--icon mr-2">
+              <FontAwesomeIcon icon={['fab', 'google']} />
+            </span>
+            <span className="btn-wrapper--label">with Google</span>
+          </button>
+          <button className="btn-pill btn btn-sm mt-2 btn-facebook btn-rounded d-flex align-items-center justify-content-center mr-2">
+            <span className="btn-wrapper--icon mr-2">
+              <FontAwesomeIcon icon={['fab', 'facebook']} />
+            </span>
+            with Facebook
+          </button>
+        </div>
+        <div className="d-flex align-items-center justify-content-center mt-3 flex-column">
+          <hr className="w-100 mt-4" />
+          <p
+            className="mt-n5"
+            style={{ backgroundColor: 'white', padding: '18px 24px  0 24px' }}>
+            OR
+          </p>
+        </div> */}
+
+        <FormGroup>
+          <Label htmlFor="firstname">{t('translation:Firstname')}</Label>
+          <Input
+            type="text"
+            name="firstname"
+            id="firstname"
+            placeholder="Ex : John"
+            maxLength={15}
+            onKeyPress={(e) => {
+              // Only allow letters and spaces
+              const char = String.fromCharCode(e.which);
+              if (!/[a-zA-ZÀ-ÿ\s]/.test(char)) {
+                e.preventDefault();
+              }
+            }}
+            onChange={(e) => {
+              // Only allow English letters (A-Z, a-z)
+              const value = e.target.value.replace(/[^A-Za-z]/g, '');
+              user.firstName = value;
+              e.target.value = value;
+            }}
+            onBlur={() => {
+              setFirstNameValid(user.firstName === '');
+            }}
+            invalid={firstNameValid}
+          />
+          <FormFeedback>{t('translation:FirstNameRequired')}</FormFeedback>
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="lastname">{t('translation:Lastname')}</Label>
+          <Input
+            type="text"
+            name="lastname"
+            id="lastname"
+            placeholder="Ex : Doe"
+            maxLength={15}
+            onKeyPress={(e) => {
+              // Only allow letters and spaces
+              const char = String.fromCharCode(e.which);
+              if (!/[a-zA-ZÀ-ÿ\s]/.test(char)) {
+                e.preventDefault();
+              }
+            }}
+            onChange={(e) => {
+              // Only allow English letters (A-Z, a-z)
+              const value = e.target.value.replace(/[^A-Za-z]/g, '');
+              user.lastName = value;
+              e.target.value = value;
+            }}
+            onBlur={() => {
+              setLastNameValid(user.lastName === '');
+            }}
+            invalid={lastNameValid}
+          />
+          <FormFeedback>{t('translation:LastNameRequired')}</FormFeedback>
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="gender">{t('translation:gender')}</Label>
+          <div className="d-flex">
+            <CustomInput
+              className={i18n.language == 'en' ? 'mr-5' : 'ml-5'}
+              type="radio"
+              id="male"
+              name="gender"
+              label={t('translation:Male')}
+              value="1"
+              onChange={(e) => {
+                if (e.target && e.target.value) {
+                  setGender(e.target.value);
+                  user.genderValue = '1';
+                }
+              }}
+              checked={gender === '1'}
+            />
+            <CustomInput
+              className=""
+              type="radio"
+              id="female"
+              name="gender"
+              label={t('translation:Female')}
+              value="2"
+              checked={gender === '2'}
+              onChange={(e) => {
+                if (e.target && e.target.value) {
+                  setGender(e.target.value);
+                  user.genderValue = '2';
+                }
+              }}
+            />
+          </div>
+        </FormGroup>
+        <FormGroup>
+          <Upload
+            Label={t('translation:ProfilePicture')}
+            uploadTypes={'image/jpeg, image/png'}
+            multiple={false}
+            onImageUpload={imageUpload}
+            uploadType={1}
+            disableDragDrop
+          />
+        </FormGroup>
+        <FormGroup className="input-icon">
+          <ReservationDateComponent
+            lableText={t('translation:DateOfBirth')}
+            placeholder={t('all:auth.pickDob')}
+            calenderIconClass={
+              'fi fi-rr-calendar font-weight-bold font-size-xl icon'
+            }
+            onDateSelected={(selectedDate) => {
+              user.dateOfBirth = selectedDate;
+              setStartDate(selectedDate);
+            }}
+            isPastDateAllowed={true}
+            userSelectedDate={startDate}
+            hideClearButton={true}
+          />
+        </FormGroup>
+        <FormGroup className="input-icon">
+          <div className="mb-4">
+            <Label htmlFor="Country" className="font-size-xs mb-0 mt-n4">
+              {t('translation:Nationality')}
+            </Label>
+            <Typeahead
+              id="typeID2"
+              labelKey="name"
+              name="Country"
+              multiple={false}
+              options={countryList}
+              onChange={(selectedOptions) => {
+                if (selectedOptions && selectedOptions.length > 0) {
+                  user.nationalityId = selectedOptions[0].encryptId;
+                  setValidCountry(user.nationalityId === '');
+                }
+              }}
+              onInputChange={(input, e) => {
+                user.nationalityId = '';
+              }}
+              placeholder={t('translation:ChooseCountry')}
+            />
+            <div className="d-flex justify-content-between mg-b-5">
+              <label style={{ color: 'red' }}>
+                {validCountry ? t('translation:NationalityRequired') : ''}
+              </label>
+            </div>
+          </div>
+        </FormGroup>
+        <FormGroup className="input-icon">
+          <div className="mb-4 input-icon position-relative">
+            <Label htmlFor="phoneNumber" className="font-size-xs mb-0 mt-n4">
+              {t('all:auth.PhoneNumber')}
+            </Label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <select
+                value={selectedCountry}
+                onChange={handleCountryChange}
+                style={{ 
+                  padding: '8px 12px', 
+                  border: '1px solid #ced4da', 
+                  borderRadius: '0.25rem',
+                  width: '150px',
+                  fontSize: '14px'
+                }}
+              >
+                {Object.entries(countryConfigs).map(([key, { name, flag, code }]) => (
+                  <option key={key} value={key}>
+                    {flag} {code} ({name})
+                  </option>
+                ))}
+              </select>
+              <input
+                type="tel"
+                name="phoneNumber"
+                id="phoneNumber"
+                placeholder={countryConfigs[selectedCountry].placeholder}
+                value={phone}
+                onChange={handlePhoneChange}
+                style={{ 
+                  flex: 1,
+                  padding: '8px 12px',
+                  border: phoneError ? '1px solid #dc3545' : '1px solid #ced4da',
+                  borderRadius: '0.25rem',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+            <FormFeedback>
+              {phoneError}
+            </FormFeedback>
+            <i className="fi fi-rr-phone-call font-weight-bold font-size-xl icon"></i>
+            
+             
+          </div>
+        </FormGroup>
+        <FormGroup className="input-icon pos">
+          <Label htmlFor="exampleEmail">{t('all:auth.Email')}</Label>
+          <Input
+            type="email"
+            name="email"
+            id="exampleEmail"
+            onChange={(e) => {
+              user.email = e.target.value;
+            }}
+            placeholder="johndoe@gmail.com"
+            onBlur={() => {
+              setValidEmail(user.email === '');
+            }}
+            invalid={validEmail}
+          />
+          <FormFeedback>{t('all:auth.Invalidemail')}</FormFeedback>
+          <i className="fi fi-rr-envelope font-weight-bold font-size-xl icon"></i>
+        </FormGroup>
+        <FormGroup className="input-icon">
+          <Label htmlFor="examplePassword">{t('translation:Password')}</Label>
+      <Input
+  type={isPasswordVisible ? 'text' : 'password'}
+  name="password"
+  id="examplePassword"
+  onChange={(e) => {
+    user.password = e.target.value;
+  }}
+  placeholder={t('translation:Password')}
+  required={true}
+  onBlur={() => {
+    setValidPassword(user.password === '');
+  }}
+  invalid={validPassword}
+/>
+<FormFeedback>{t('translation:PasswordRequired')}</FormFeedback>
+<i className="fi fi-rr-lock font-weight-bold font-size-xl icon"></i>
+<button
+  className="btn btn-link btn-link-second font-size-xs toggle-password p-0"
+  onClick={(e) => {
+    e.preventDefault();
+    setIsPasswordVisible(!isPasswordVisible);
+    setPasswordVisibilityText(
+      passwordVisibilityText === t('all:auth.show') ? t('all:auth.hide') : t('all:auth.show')
+    );
+  }}>
+  <i className="fi fi-rr-eye mr-1 ml-1"></i> {passwordVisibilityText}
+</button>
+        </FormGroup>
+        <FormGroup className="input-icon">
+          <Label htmlFor="Confirmpassword">{t('translation:ConfirmPassword')}</Label>
+          <Input
+  type={isConfirmPasswordVisible ? 'text' : 'password'}
+  name="Confirmpassword"
+  id="Confirmpassword"
+  onChange={(e) => {
+    user.confirmPassword = e.target.value;
+  }}
+  placeholder={t('translation:ConfirmPassword')}
+  required={true}
+  onBlur={() => {
+    setValidConfirmPassword(user.confirmPassword === '');
+  }}
+  invalid={validConfirmPassword}
+/>
+          {/* <FormFeedback>Confirm Password Required</FormFeedback> */}
+          <FormFeedback>
+            {passwordValidationMessage != ''
+              ? passwordValidationMessage
+              : t('ConfirmPasswordRequired')}
+          </FormFeedback>
+          <i className="fi fi-rr-lock font-weight-bold font-size-xl icon"></i>
+          <button
+            className="btn btn-link btn-link-second font-size-xs toggle-password p-0"
+            onClick={(e) => {
+              e.preventDefault();
+              setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
+              setConfirmPasswordVisibilityText(
+                confirmPasswordVisibilityText === t('all:auth.show') ? t('all:auth.hide') : t('all:auth.show')
+              );
+            }}>
+            <i className="fi fi-rr-eye mr-1 ml-1"></i> {confirmPasswordVisibilityText}
+          </button>
+        </FormGroup>
+        <div className="mb-2">
+          <div
+            className="custom-control custom-control-alternative
+                           d-flex align-items-center custom-checkbox mb-2">
+            <input
+              className="custom-control-input"
+              id="AcceptTerms"
+              type="checkbox"
+              invalid={true}
+              onChange={(e) => {
+                setIsAgreed(e.target.checked);
+              }}
+            />
+            <label
+              className="custom-control-label font-size-sm"
+              htmlFor="AcceptTerms">
+              <span>
+                  {t('all:auth.agree')}
+                <a href="#/" className="text-first font-size-sm ml-2">
+                  {t('all:auth.Terms')}
+                </a>
+              </span>
+            </label>
+          </div>
+          <div
+            className="custom-control custom-control-alternative
+                           d-flex align-items-center custom-checkbox">
+            <input
+              className="custom-control-input"
+              id="AcceptNewsLetters"
+              type="checkbox"
+            />
+            <label
+              className="custom-control-label font-size-sm"
+              htmlFor="AcceptNewsLetters">
+              <span>{t('all:auth.Promotion')}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <LaddaButton
+        className="mt-3 btn btn-primary w-100"
+        loading={expRight}
+        onClick={(e) => {
+          e.preventDefault();
+          toggleLoader(true);
+          registerIndividualUser();
+        }}
+        data-style={EXPAND_RIGHT}>
+        {t('Createaccount')}
+      </LaddaButton>
+
+      <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-between mt-4">
+        <p className="font-size-sm mb-0 mr-2">{t('all:auth.haveAccount')}</p>
+        <Button
+          className="btn-pill btn-neutral-second btn btn-rounded btn-sm ml-2 mt-2 mt-sm-0"
+          onClick={() => {
+            loginActivity({ snAct: 4, selectedTab: 1 });
+          }}>
+          {t('all:auth.Login')}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+const mapStateToProps = (state) => {
+  return state;
+};
+
+export default connect(mapStateToProps, { loginActivity: customerLoginAction })(
+  CustomerCreateAccount
+);
